@@ -1,17 +1,16 @@
-# ⚡ PULSE 4.0 — Industrial Predictive Maintenance System
+# ⚡ PULSE 4.0 — Industrial IIoT Monitoring Dashboard
 
 <div align="center">
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![MQTT](https://img.shields.io/badge/MQTT-660066?style=for-the-badge&logo=mqtt&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
-![Node-RED](https://img.shields.io/badge/Node--RED-8F0000?style=for-the-badge&logo=node-red&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
 
-**End-to-end IIoT Predictive Maintenance Platform**  
-_Siemens S7 PLC → MQTT → SQL Server → ML → LLM → Power BI — 100% on-premises, zero cloud dependency_
+**End-to-end IIoT Real-Time Monitoring & Predictive Maintenance Web Dashboard**  
+_SQL Server → Python → Streamlit — live auto-refresh, 9-tab industrial UI, historic data mode_
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=flat-square)
 ![Domain](https://img.shields.io/badge/Domain-Industry%204.0%20%7C%20IIoT-blue?style=flat-square)
@@ -23,12 +22,9 @@ _Siemens S7 PLC → MQTT → SQL Server → ML → LLM → Power BI — 100% on-
 
 ## 📋 Overview
 
-**PULSE 4.0** is a production-grade **Industry 4.0 predictive maintenance system** built entirely from scratch as a personal engineering project. It ingests real-time telemetry from a **Siemens SIMATIC S7-1200C PLC** over Ethernet using the Snap7 protocol, streams sensor data through an **MQTT messaging layer**, persists it in **SQL Server**, applies **Scikit-learn ML models** for anomaly detection and failure prediction, enriches results with a local **Ollama LLM**, and surfaces insights via two parallel interfaces:
+**PULSE 4.0** is a production-grade **Industry 4.0 IIoT monitoring dashboard** built entirely from scratch as a personal engineering project. It reads machine telemetry from a **SQL Server** backend, computes OEE, predictive maintenance, energy, ROI and anomaly KPIs via a **Python calculations engine**, and surfaces everything through a **Streamlit web application** featuring a bespoke "Ultra Premium Dark Industrial" UI theme built with custom CSS, JetBrains Mono typography, and Plotly charts.
 
-- 📊 A **9-page Power BI dashboard** with custom "PULSE 4.0 Industrial Dark" theme  
-- 🖥️ A **CustomTkinter desktop application** with Aurora Industrial Dark v2 UI
-
-The entire platform runs on-premises — no cloud services, no SaaS subscriptions, no external API calls.
+The dashboard auto-refreshes live sensor data every 5 seconds using Streamlit's fragment API — without re-rendering the page structure — and fully supports **historic data mode** for any past date range with a purple-themed mode indicator and paused live refresh.
 
 ---
 
@@ -36,58 +32,52 @@ The entire platform runs on-premises — no cloud services, no SaaS subscription
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PULSE 4.0 — End-to-End Architecture                       │
+│                    PULSE 4.0 — Application Architecture                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 
   ┌───────────────────────────┐
-  │  Siemens SIMATIC S7-1200C │   ← Industrial PLC: process sensors,
-  │  (Ethernet / ISO-TCP:102) │     actuators, diagnostic registers
+  │   Industrial Data Source  │   ← Machine sensors, PLC registers,
+  │   (SQL Server Database)   │     telemetry tables, ML prediction results
   └─────────────┬─────────────┘
-                │  Snap7 Protocol (Python)
+                │  pyodbc / SQLAlchemy
                 ▼
   ┌─────────────────────────────┐
-  │   Python Snap7 Client       │   ← Polls DB registers, I/O tags,
-  │   (Data Acquisition Layer)  │     diagnostic data blocks at configurable
-  └─────────────┬───────────────┘     intervals
-                │  JSON Payload
+  │   db.py                     │   ← fetch_raw_data(), load_config()
+  │   (Data Access Layer)       │     Reads config.json, queries SQL Server,
+  └─────────────┬───────────────┘     returns cleaned DataFrame
+                │  pandas DataFrame
                 ▼
   ┌─────────────────────────────┐
-  │   MQTT Publisher            │──────────► Mosquitto Broker
-  │   (Paho-MQTT)               │              │
-  └─────────────────────────────┘              │ Subscribe
-                                               ▼
-                                  ┌─────────────────────────┐
-                                  │   Node-RED Flows         │
-                                  │  ─ Engineering unit conv │
-                                  │  ─ Tag mapping/routing   │
-                                  │  ─ Conditional alerting  │
-                                  └────────────┬────────────┘
-                                               │
-                                               ▼
-                                  ┌─────────────────────────┐
-                                  │   Microsoft SQL Server   │
-                                  │  ─ Raw telemetry tables  │
-                                  │  ─ ML prediction results │
-                                  │  ─ Alert & event log     │
-                                  └────────────┬────────────┘
-                                               │
-                   ┌───────────────────────────┼────────────────────────┐
-                   ▼                           ▼                        ▼
-    ┌──────────────────────┐    ┌──────────────────────┐  ┌────────────────────────┐
-    │  Scikit-learn ML     │    │  Ollama LLM (Local)  │  │  Power BI Desktop      │
-    │  ─ Anomaly Detection │    │  ─ NL diagnostics    │  │  ─ 9-Page Dashboard    │
-    │  ─ RUL Estimation    │    │  ─ Maintenance advice│  │  ─ Industrial Dark Theme│
-    │  ─ Fault Classifier  │    │  ─ Fully offline     │  │  ─ DirectQuery + Import │
-    └──────────────────────┘    └──────────────────────┘  └────────────────────────┘
-                   │
-                   ▼
-    ┌──────────────────────────────────┐
-    │  CustomTkinter Desktop App       │
-    │  ─ Aurora Industrial Dark v2 UI  │
-    │  ─ Lazy tab rendering            │
-    │  ─ Real-time KPI cards           │
-    │  ─ Packaged: PyInstaller+PyArmor │
-    └──────────────────────────────────┘
+  │   calculations.py           │   ← compute_all(), color_flag(),
+  │   (KPI Engine)              │     style_dataframe()
+  └─────────────┬───────────────┘     OEE, MTBF, RUL, ROI, energy KPIs
+                │  kpis dict
+                ▼
+  ┌──────────────────────────────────────────────────────┐
+  │   app4.py  —  Streamlit Web Application              │
+  │                                                      │
+  │   ┌──────────────┐   ┌──────────────────────────┐   │
+  │   │  Sidebar     │   │  9-Tab Dashboard          │   │
+  │   │  Filters     │   │  ─ ⬡ Command Center       │   │
+  │   │  ─ Plant     │   │  ─ ⚙ Operations           │   │
+  │   │  ─ Line      │   │  ─ 🔧 Maintenance          │   │
+  │   │  ─ Machine   │   │  ─ 📡 Technician           │   │
+  │   │  ─ Status    │   │  ─ ₹  ROI & Finance        │   │
+  │   │  ─ Severity  │   │  ─ ⚡ Energy & ESG         │   │
+  │   │  ─ Risk      │   │  ─ 🤖 AI Insights          │   │
+  │   │  ─ Date Range│   │  ─ 📋 Shift Report         │   │
+  │   └──────────────┘   │  ─ 📄 Machine Detail       │   │
+  │                       └──────────────────────────┘   │
+  │                                                      │
+  │   @st._fragment(run_every=5s) — flicker-free live    │
+  │   refresh via st.empty() slot pattern                │
+  └──────────────────────────────────────────────────────┘
+                │
+                ▼  Browser
+  ┌─────────────────────────────┐
+  │   End User                  │   ← Any browser, LAN or internet
+  │   (Web Dashboard)           │     with optional auth/reverse proxy
+  └─────────────────────────────┘
 ```
 
 ---
@@ -96,111 +86,87 @@ The entire platform runs on-premises — no cloud services, no SaaS subscription
 
 | Layer | Technology | Role |
 |---|---|---|
-| **Hardware** | Siemens SIMATIC S7-1200C PLC | Industrial process controller — primary data source |
-| **PLC Connectivity** | Python `snap7` | ISO-TCP Ethernet communication; reads DB registers & I/O tags |
-| **Message Broker** | Mosquitto (MQTT) | Real-time telemetry streaming and topic routing |
-| **MQTT Client** | Paho-MQTT (Python) | Publisher (acquisition side) and subscriber (flow side) |
-| **Flow Orchestration** | Node-RED | Tag mapping, unit conversion, alert condition evaluation |
-| **Data Persistence** | Microsoft SQL Server | Primary time-series store for telemetry, ML results, events |
-| **Machine Learning** | Scikit-learn | Anomaly detection, fault classification, RUL estimation |
-| **Local LLM** | Ollama | AI-generated maintenance advisories — offline inference |
-| **Desktop UI** | Python CustomTkinter | Aurora Industrial Dark v2 themed desktop application |
-| **Business Intelligence** | Microsoft Power BI | 9-page PULSE 4.0 Industrial Dark dashboard |
-| **Packaging** | PyInstaller + PyArmor | Single-file Windows executable with code obfuscation |
+| **Web Framework** | Streamlit | Single-page web app, tab layout, sidebar, fragment live refresh |
+| **Data Visualisation** | Plotly (Express + Graph Objects) | Bar, line, area, scatter, pie, waterfall, box charts |
+| **Data Processing** | Pandas | DataFrame filtering, aggregation, KPI computation |
+| **Data Access** | `db.py` (custom) | SQL Server connection, raw data fetch, config loader |
+| **KPI Engine** | `calculations.py` (custom) | OEE, MTBF, RUL, ROI, energy efficiency, anomaly, risk scoring |
+| **Configuration** | `config.json` | App settings, color tokens, refresh interval, cost parameters |
+| **Database** | Microsoft SQL Server | Primary telemetry store — machines, sensors, alarms, predictions |
+| **UI Theme** | Custom CSS + Google Fonts | Ultra Premium Dark Industrial — Inter + JetBrains Mono |
+| **Charting** | Plotly | Industrial-themed dark charts with threshold reference lines |
 
 ---
 
 ## ✨ Key Features
 
-### 🔌 Real-Time PLC Integration
-- Direct Ethernet connection to Siemens SIMATIC S7-1200C using `snap7` Python library
-- Reads process DB registers, discrete I/O, and diagnostic memory areas
-- Configurable polling interval to balance data granularity with network load
+### ⚡ Flicker-Free Live Refresh
+- Uses Streamlit's `@st._fragment(run_every=N)` to update data every 5 seconds
+- Tab structure and layout rendered **once** outside the fragment — never rebuilt
+- Each content section uses `st.empty()` slot pattern — only data updates, no DOM tear-down
+- MutationObserver JS injected to immediately cancel any Streamlit opacity-dim on refresh
+- All `transition` and `animation` properties suppressed on structural elements
 
-### 📡 MQTT Streaming Pipeline
-- Structured JSON telemetry published to Mosquitto broker via Paho-MQTT
-- Node-RED subscribes and applies engineering unit conversions, tag name mapping, and threshold-based alerting
-- Decoupled architecture — any downstream consumer can subscribe to any topic
+### 🕐 Historic Data Mode
+- Date range picker defaults to **today** (live view) — fully editable back to earliest DB record
+- When a past date range is selected, a **purple-themed historic mode banner** appears across all tabs
+- Header switches from `⚡ LIVE` to `🕐 HISTORIC` with the selected date range displayed
+- Live auto-refresh is **paused** in historic mode — data stays frozen to the selected range
+- All KPIs, charts, tables and alerts reflect the filtered historic date range
 
-### 🤖 Scikit-learn ML Engine
-- **Anomaly Detection** — flags deviations from normal operating baselines
-- **Fault Classification** — categorizes fault types based on sensor signature patterns
-- **Remaining Useful Life (RUL) Estimation** — predicts component degradation trajectory
+### 🎛️ Sidebar Filters — All Applied Globally
+- **Plant** → **Line** (cascading) → **Machine ID** → **Status** → **Alarm Severity** → **Risk Level** → **Date Range**
+- All filters are applied inside the fragment before any KPI computation
+- Filter state read via `st.session_state` so sidebar changes instantly propagate to the live fragment
 
-### 🧠 Local Ollama LLM Layer
-- Fully offline AI inference — no OpenAI or cloud API dependency
-- Takes ML output as context and generates natural-language maintenance recommendations
-- Zero data leaves the plant network
+### ⬡ Command Center (Tab 1)
+- 12 KPI cards across two rows: OEE, Availability, Risk, Units, Downtime, Failure Risk, Running/Stopped, Fleet Online %, Reject Rate, Anomalies, MTBF
+- OEE % by Plant (horizontal bar), Fleet Status donut, High Alarms by Plant (bar)
+- Full OEE trend line chart across all plants with 85% target reference line
+- Alert banners for high-severity machines and critical failure probability
 
-### 📊 9-Page Power BI Dashboard
-- Custom **"PULSE 4.0 Industrial Dark"** theme — built from scratch for industrial aesthetics
-- Mix of DirectQuery (live telemetry) and Import (historical/ML result) data modes
-- Pages cover live KPIs, telemetry trends, anomaly scores, fault history, RUL, alerts, ML predictions, LLM advisories, and system health
+### ⚙ Operations (Tab 2)
+- Production Rate, High Alarms, Downtime, Good Units %, Power Factor KPIs
+- Downtime Pareto chart (bar + cumulative % line on dual axis)
+- Production Rate by Plant (box plot), OEE % by Machine, Alarm Distribution (stacked bar)
 
-### 🖥️ Aurora Industrial Dark v2 Desktop App
-- Built with Python **CustomTkinter** — native-feeling desktop UI
-- **Lazy tab rendering** — tabs initialize only when first accessed, dramatically reducing startup time and memory footprint
-- Panels: live telemetry, ML predictions, alert console, historical trends, LLM advisory
+### 🔧 Maintenance (Tab 3)
+- 8 KPI cards: Maintenance Needed, Critical Risk, Anomalies, MTBF, Failure Risk %, Avg RUL, Predicted Failures 24h, Anomaly Rate %
+- Failure Probability % by Machine (horizontal bar with 70% critical line)
+- RUL Prediction by Machine (horizontal bar with 500-cycle minimum line)
+- Vibration vs Bearing Temp scatter — bubble sized by Failure %, coloured by Risk Level
+- Full Risk Priority Table with colour-coded styling
 
-### 📦 PyInstaller + PyArmor Deployment Pipeline
-- Single `.exe` output via PyInstaller — no Python runtime needed on target machine
-- Source code obfuscated with PyArmor for IP protection
-- `build.bat` script automates the full packaging workflow
+### 📡 Technician (Tab 4)
+- 8 live sensor KPIs: Max Temperature, Max Vibration, Max RPM, Max Bearing Temp, Max Power, Avg Voltage, Machines At Risk, Latest Timestamp
+- Temperature trend area chart (80°C limit), Vibration trend area chart (4.5 mm/s limit)
+- Full Live Sensor Readings table with all sensor columns
 
----
+### ₹ ROI & Finance (Tab 5)
+- Downtime Saved ₹, Energy Saved ₹, Reject Cost ₹, Total Savings ₹, Payback Months, ROI Multiplier, Net Benefit ₹, Total Energy kWh
+- Waterfall chart: savings breakdown by category
+- Savings by Plant (horizontal bar), Energy Efficiency % by Plant, Reject Cost by Plant
 
-## 🔄 Complete Data Flow
+### ⚡ Energy & ESG (Tab 6)
+- Total Energy kWh, CO₂ Equivalent, Energy Cost ₹, Avg Efficiency %, Avg Power Factor
+- Energy by Plant (horizontal bar), Efficiency Trend (area chart)
+- Power Factor by Machine, CO₂ by Plant
 
-```
-Step 1 — ACQUISITION
-  └─ Python Snap7 polls PLC every N ms
-  └─ Reads: process values, status bits, diagnostic registers, counters
+### 🤖 AI Insights (Tab 7)
+- Fleet Health Score — large numeric display with colour-coded status (EXCELLENT / GOOD / FAIR / CRITICAL)
+- AI Alerts, Predicted Failures, Anomaly Rate %, Critical Machines KPIs
+- Failure Risk % by Machine (bar), Risk Level Distribution (donut pie)
+- AI Risk Summary Table
 
-Step 2 — PUBLISHING
-  └─ JSON payload structured with tag names, timestamp, engineering units
-  └─ Published to Mosquitto under topic: pulse4/{plant}/{device}/{parameter}
+### 📋 Shift Report (Tab 8)
+- Shift OEE %, Units Produced, Shift Downtime, Shift Alarms KPIs
+- OEE % by Shift and Plant (grouped bar), Units Produced by Machine (bar)
+- Shift Detail table — all machines
 
-Step 3 — FLOW PROCESSING (Node-RED)
-  └─ Subscribes to MQTT topics
-  └─ Applies engineering unit conversions (raw ADC → physical units)
-  └─ Maps PLC tag addresses to human-readable signal names
-  └─ Evaluates thresholds → routes alerts to SQL Server event log
-
-Step 4 — PERSISTENCE (SQL Server)
-  └─ Raw telemetry → time-stamped fact tables
-  └─ Aggregated KPIs → computed views for BI consumption
-  └─ Alerts → event log table with severity, source, timestamp
-
-Step 5 — ML INFERENCE (Scikit-learn)
-  └─ Pipelines consume persisted telemetry
-  └─ Output: anomaly score (0-1), fault label, RUL estimate (hours)
-  └─ Results written back to SQL Server prediction tables
-
-Step 6 — LLM ENRICHMENT (Ollama)
-  └─ ML results + recent telemetry context passed as prompt
-  └─ Returns natural-language maintenance advisory
-  └─ Advisory stored and surfaced via both UI interfaces
-
-Step 7 — VISUALIZATION
-  └─ Power BI: DirectQuery live data + Import for ML/historical layers
-  └─ CustomTkinter App: polling loop with lazy-loaded tab components
-```
-
----
-
-## 📊 Power BI Dashboard — Page Inventory
-
-| Page # | Title | Content |
-|---|---|---|
-| 1 | Executive Overview | Live KPI summary — OEE, availability, fault count, RUL critical alerts |
-| 2 | Real-Time Telemetry | Live sensor feeds, process variable gauges |
-| 3 | Anomaly Detection | ML anomaly score trends, threshold breach markers |
-| 4 | Fault Classification | Fault type distribution, Pareto analysis |
-| 5 | Remaining Useful Life | RUL estimates by component, degradation curves |
-| 6 | Alert History | Timestamped event log with severity classification |
-| 7 | Predictive Insights | ML model confidence, prediction accuracy tracking |
-| 8 | Maintenance Advisory | LLM-generated recommendations panel |
-| 9 | System Health | Pipeline connectivity status, data freshness indicators |
+### 📄 Machine Detail (Tab 9)
+- Full 36-column sensor data table for selected machine/filter
+- Context banner: machine, plant, as-of timestamp
+- CSV export (filtered view) + All Records CSV export
 
 ---
 
@@ -208,60 +174,38 @@ Step 7 — VISUALIZATION
 
 ```
 pulse4.0/
-├── plc/
-│   └── snap7_client.py           # PLC data acquisition — Snap7 ISO-TCP reader
-├── mqtt/
-│   └── publisher.py              # Paho-MQTT telemetry publisher
-├── node_red/
-│   └── flows.json                # Exported Node-RED flow definitions
-├── database/
-│   └── schema.sql                # SQL Server schema — tables, views, indexes
-├── ml/
-│   ├── anomaly_detection.py      # Isolation Forest / One-Class SVM pipeline
-│   ├── fault_classifier.py       # Supervised fault classification pipeline
-│   └── rul_estimator.py          # Regression-based RUL estimation
-├── llm/
-│   └── ollama_advisor.py         # Ollama integration — prompt builder + response handler
-├── app/
-│   ├── main.py                   # CustomTkinter entry point
-│   ├── theme/                    # Aurora Industrial Dark v2 color tokens
-│   └── tabs/                     # Lazy-loaded tab components
-├── powerbi/
-│   └── PULSE4_Dashboard.pbix     # Power BI report file
-├── config/
-│   └── settings.yaml             # All configuration (separate from code)
-└── deploy/
-    └── build.bat                 # PyInstaller + PyArmor packaging script
+├── app4.py               # Main Streamlit application — UI, tabs, fragment refresh
+├── db.py                 # Data access layer — SQL Server connection, fetch_raw_data()
+├── calculations.py       # KPI engine — compute_all(), color_flag(), style_dataframe()
+├── config.json           # App configuration — DB connection, refresh interval, cost params
+└── requirements.txt      # Python dependencies
 ```
 
 ---
 
-## ⚙️ Configuration (`config/settings.yaml`)
+## ⚙️ Configuration (`config.json`)
 
-```yaml
-plc:
-  ip: "192.168.x.x"
-  rack: 0
-  slot: 1
-  poll_interval_ms: 1000
-
-mqtt:
-  broker: "localhost"
-  port: 1883
-  topic_prefix: "pulse4/"
-
-database:
-  server: "localhost"
-  database: "PULSE4_DB"
-  trusted_connection: true
-
-ollama:
-  model: "llama3.1:8b"
-  endpoint: "http://localhost:11434"
-  max_tokens: 512
+```json
+{
+  "app": {
+    "refresh_interval_ms": 5000,
+    "cost_per_minute_inr": 500,
+    "product_value_inr": 250,
+    "implementation_cost_inr": 500000
+  },
+  "colors": {
+    "red": "#e63946",
+    "amber": "#ff9f1c",
+    "green": "#06d6a0",
+    "blue": "#00b4d8"
+  },
+  "database": {
+    "server": "localhost",
+    "database": "PULSE4_DB",
+    "trusted_connection": true
+  }
+}
 ```
-
-> **Note:** CLI arguments override all config values at runtime.
 
 ---
 
@@ -270,12 +214,8 @@ ollama:
 ### Prerequisites
 
 - Python 3.10+
-- Siemens S7-1200C PLC with Ethernet port (ISO-TCP port 102 accessible)
-- Mosquitto MQTT Broker
-- Node-RED
-- Microsoft SQL Server
-- Ollama with `llama3.1:8b` pulled (`ollama pull llama3.1:8b`)
-- Power BI Desktop (for the dashboard)
+- Microsoft SQL Server (local or network)
+- ODBC Driver 17 or 18 for SQL Server
 
 ### Installation
 
@@ -285,27 +225,129 @@ cd pulse4.0
 pip install -r requirements.txt
 ```
 
-### Running the Pipeline
+### Requirements
+
+```
+streamlit
+pandas
+plotly
+pyodbc
+sqlalchemy
+```
+
+### Running the Dashboard
 
 ```bash
-# Initialize database schema
-sqlcmd -S localhost -i database/schema.sql
-
-# Start PLC acquisition
-python plc/snap7_client.py --config config/settings.yaml
-
-# Start desktop application
-python app/main.py
-
-# Build distributable executable
-deploy/build.bat
+streamlit run app4.py
 ```
+
+The dashboard will open at `http://localhost:8501` by default.
+
+### Running on a Custom Port
+
+```bash
+streamlit run app4.py --server.port 8080
+```
+
+---
+
+## 🔐 Exposing to the Internet — Securely
+
+> **Never expose a raw `streamlit run` process directly to the internet.**  
+> Always place it behind a reverse proxy with TLS and authentication.
+
+### Recommended Production Setup
+
+```
+Internet → Cloudflare / DNS → Nginx (TLS + Auth) → localhost:8501 (Streamlit)
+```
+
+**Step 1 — Add Streamlit authentication** (simplest layer):
+
+Use [`streamlit-authenticator`](https://github.com/mkhorasani/Streamlit-Authenticator) to add login before the dashboard loads.
+
+```bash
+pip install streamlit-authenticator
+```
+
+**Step 2 — Run behind Nginx with TLS**:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name pulse.yourdomain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/pulse.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/pulse.yourdomain.com/privkey.pem;
+
+    location / {
+        proxy_pass         http://127.0.0.1:8501;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_set_header   Host $host;
+        proxy_read_timeout 86400;
+    }
+}
+```
+
+Get a free TLS certificate via [Let's Encrypt](https://letsencrypt.org/):
+```bash
+certbot --nginx -d pulse.yourdomain.com
+```
+
+**Step 3 — Firewall** (allow only ports 80, 443):
+
+```bash
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw deny 8501   # block direct Streamlit port from internet
+ufw enable
+```
+
+**Step 4 — Optional: Cloudflare Tunnel** (zero open inbound ports):
+
+```bash
+cloudflared tunnel --url http://localhost:8501
+```
+No port forwarding needed — Cloudflare handles TLS and DDoS protection.
+
+**Step 5 — Keep Streamlit running**:
+
+```bash
+# systemd service (Linux)
+[Unit]
+Description=PULSE 4.0 Dashboard
+After=network.target
+
+[Service]
+User=pulse
+WorkingDirectory=/opt/pulse4.0
+ExecStart=/usr/bin/streamlit run app4.py --server.port 8501 --server.headless true
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl enable pulse4 && systemctl start pulse4
+```
+
+**Security checklist:**
+
+- [ ] HTTPS only — no HTTP access to the dashboard
+- [ ] Login wall via `streamlit-authenticator` before any data is visible
+- [ ] SQL Server accessible only from `localhost` — no public DB port
+- [ ] Firewall blocks port 8501 from external access
+- [ ] Streamlit config: `server.headless = true`, `server.enableCORS = false`
+- [ ] Rotate credentials; use environment variables, not hardcoded strings in `config.json`
 
 ---
 
 ## 🏭 Domain Context
 
-Built for the **manufacturing / Industry 4.0** domain, PULSE 4.0 solves the real operational challenge of converting raw PLC registers into actionable maintenance intelligence without cloud connectivity — a critical requirement for air-gapped or bandwidth-constrained industrial environments.
+Built for the **manufacturing / Industry 4.0** domain, PULSE 4.0 converts raw machine telemetry stored in SQL Server into actionable operational intelligence — OEE tracking, predictive maintenance scheduling, energy ESG reporting, and ROI quantification — surfaced through a browser-based dashboard accessible from any device on the plant network or securely over the internet.
 
 ---
 
